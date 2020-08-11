@@ -6,7 +6,7 @@ const Nav = () => {
 
   return (
     <Appbar.Header>
-      <Appbar.Content title="Steady's Coffee Shop" style={styles.navBar} />
+      <Appbar.Content style={styles.navBar} title="Steady's Coffee Shop" />
     </Appbar.Header>
   );
 };
