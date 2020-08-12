@@ -13,25 +13,13 @@ export default class Home extends Component {
     }
   }
 
-  ComponentDidMount() {
-    const { orders, pickup } = this.state;
+  componentDidMount() {
+    this._updateTracking();
+    this.interval = setInterval(this._updateTracking, 1000);
+  }
 
-    if (orders.length) {
-      let intervalTime = queuedDrink.prepTime * 1000;
-      
-      setInterval(function() {
-        let readyItem = orders.shift();
-        pickup.push(readyItem)
-        this.setState(previousState => (
-          { 
-            orders: previousState.orders,
-            queuedDrink: orders[0],
-            pickup: pickup
-          }
-        ))
-
-      }, intervalTime)
-    }
+  componentWillUnmount() {
+    clearInterval(this.interval);
   }
 
   _handleOrders = (e) => {
@@ -55,27 +43,25 @@ export default class Home extends Component {
     alert(`${newOrderObj.drink} has been ordered`);
   }
 
-  _handleTracking = () => {
+  _updateTracking = () => {
     const { orders, queuedDrink, pickup } = this.state;
-    intervalTime = queuedDrink.prepTime * 1000;
+    let intervalTime = queuedDrink.prepTime * 1000;
 
-    if (queuedDrink) {
-      setInterval(function() {
+    if (orders.length) {
+      setTimeout(() => {
         let readyItem = orders.shift();
-        pickup.push(readyItem)
-        this.setState(previousState => (
-          { 
-            orders: previousState.orders,
+        console.log('ready', readyItem)
+        pickup.push(readyItem);
+        console.log('pickupArr', pickup)
+        console.log('queued', queuedDrink)
+        this.setState({ 
+            orders: orders,
             queuedDrink: orders[0],
             pickup: pickup
-          }
-        ))
+          })
+        console.log('new state', this.state)
       }, intervalTime)
     }
-  }
-
-  _handleBarista = (drink) => {
-
   }
 
   render() {
@@ -124,10 +110,10 @@ export default class Home extends Component {
         </List.Accordion>
         <List.Accordion title="Ready for Pickup" id="4">
           {
-            pickup.map((order, index) => {
+            pickup.map((item, index) => {
                 return (
                 <List.Item
-                  title={order.drink}
+                  title={item.drink}
                   key={index}
                   left={props => <List.Icon {...props} icon="coffee" />}
                 />
