@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { List, TouchableOpacity } from 'react-native-paper';
+import { List } from 'react-native-paper';
 
 export default class Home extends Component {
 
@@ -13,32 +13,63 @@ export default class Home extends Component {
     }
   }
 
+  ComponentDidMount() {
+    const { orders, pickup } = this.state;
+
+    if (orders.length) {
+      let intervalTime = queuedDrink.prepTime * 1000;
+      
+      setInterval(function() {
+        let readyItem = orders.shift();
+        pickup.push(readyItem)
+        this.setState(previousState => (
+          { 
+            orders: previousState.orders,
+            queuedDrink: orders[0],
+            pickup: pickup
+          }
+        ))
+
+      }, intervalTime)
+    }
+  }
+
   _handleOrders = (e) => {
-    // figure out how to do this in native -> console.log(e.target)
     e.preventDefault();
-    console.log(e.currentTarget)
-    const { orders, queuedDrink } = this.state;
+    
+    // figure out how to do this in native -> console.log(e.target.value)
+    console.log(e);
+    const { orders } = this.state;
+
     let newOrderObj = {};
     newOrderObj.drink = 'drink';
     newOrderObj.prepTime = 15;
 
-    orders.push(newOrderObj)
+    orders.push(newOrderObj);
 
     this.setState({
       orders: orders,
       queuedDrink: orders[0]
     })
 
-    alert(`${newOrderObj.drink} has been ordered`)
+    alert(`${newOrderObj.drink} has been ordered`);
   }
 
   _handleTracking = () => {
-    const { orders, queuedDrink } = this.state;
-    intervalTime = queuedDrink.prepTime * 1000
+    const { orders, queuedDrink, pickup } = this.state;
+    intervalTime = queuedDrink.prepTime * 1000;
 
     if (queuedDrink) {
       setInterval(function() {
-        orders.shift();
+        let readyItem = orders.shift();
+        pickup.push(readyItem)
+        this.setState(previousState => (
+          { 
+            orders: previousState.orders,
+            queuedDrink: orders[0],
+            pickup: pickup
+          }
+        ))
       }, intervalTime)
     }
   }
@@ -48,7 +79,7 @@ export default class Home extends Component {
   }
 
   render() {
-    const { orders, queuedDrink } = this.state;
+    const { orders, queuedDrink, pickup } = this.state;
 
     return (
       <List.AccordionGroup>
@@ -61,11 +92,13 @@ export default class Home extends Component {
           />
           <List.Item
             title="Cappucino"
+            value="Cappucino"
             left={props => <List.Icon {...props} icon="coffee" />}
             onPress={ this._handleOrders }
           />
           <List.Item
             title="Espresso"
+            value="Espresso"
             left={props => <List.Icon {...props} icon="coffee" />}
             onPress={ this._handleOrders }
           />
@@ -90,10 +123,17 @@ export default class Home extends Component {
           />
         </List.Accordion>
         <List.Accordion title="Ready for Pickup" id="4">
-          <List.Item
-            title="Espresso"
-            left={props => <List.Icon {...props} icon="coffee" />}
-          />
+          {
+            pickup.map((order, index) => {
+                return (
+                <List.Item
+                  title={order.drink}
+                  key={index}
+                  left={props => <List.Icon {...props} icon="coffee" />}
+                />
+              )
+            })
+          }
         </List.Accordion>
       </List.AccordionGroup>
     )
